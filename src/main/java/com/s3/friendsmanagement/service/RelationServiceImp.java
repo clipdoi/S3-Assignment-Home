@@ -1,9 +1,16 @@
 package com.s3.friendsmanagement.service;
 
+import com.s3.friendsmanagement.exception.StatusException;
 import com.s3.friendsmanagement.model.User;
+import com.s3.friendsmanagement.model.UserRelationship;
+import com.s3.friendsmanagement.model.UserRelationshipId;
+import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
+import com.s3.friendsmanagement.repository.UserRelationshipRepository;
 import com.s3.friendsmanagement.repository.UserRepository;
+import com.s3.friendsmanagement.utils.EStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,9 +22,46 @@ public class RelationServiceImp implements RelationService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    UserRelationshipRepository userRelationshipRepository;
+
     @Override
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean addFriend(CreateFriendConnectionReq createFriendConnectionReq) {
+        User email = findByEmail(createFriendConnectionReq.getFriends().get(0));
+        User friendEmail = findByEmail(createFriendConnectionReq.getFriends().get(1));
+
+        Optional<UserRelationship> friendRelationship = userRelationshipRepository
+                .findByUserRelationship(email.getId(), friendEmail.getId());
+
+        if (friendRelationship.isPresent()) {
+            if (friendRelationship.get().getId().getStatus().contains(EStatus.BLOCK.name())) {
+                throw new StatusException("This email has been blocked !");
+            }
+            if (friendRelationship.get().getId().getStatus().contains(EStatus.FRIEND.name())) {
+                throw new StatusException("Two Email have already being friend.");
+            }
+        }
+
+        try {
+            UserRelationshipId userRelationshipId = new UserRelationshipId(email.getId(), friendEmail.getId(), EStatus.FRIEND.name());
+            UserRelationship relationship = UserRelationship.builder().id(userRelationshipId).build();
+
+            UserRelationshipId userRelationshipIdInverse = new UserRelationshipId(friendEmail.getId(), email.getId(), EStatus.FRIEND.name());
+            UserRelationship inverseRelationship = UserRelationship.builder().id(userRelationshipIdInverse).build();
+
+            userRelationshipRepository.save(relationship);
+            userRelationshipRepository.save(inverseRelationship);
+
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
 }
