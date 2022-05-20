@@ -5,6 +5,7 @@ import com.s3.friendsmanagement.model.User;
 import com.s3.friendsmanagement.model.UserRelationship;
 import com.s3.friendsmanagement.model.UserRelationshipId;
 import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
+import com.s3.friendsmanagement.payload.request.EmailRequest;
 import com.s3.friendsmanagement.repository.UserRelationshipRepository;
 import com.s3.friendsmanagement.repository.UserRepository;
 import com.s3.friendsmanagement.utils.EStatus;
@@ -12,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class RelationServiceImp implements RelationService {
@@ -44,7 +45,7 @@ public class RelationServiceImp implements RelationService {
                 throw new StatusException("This email has been blocked !");
             }
             if (friendRelationship.get().getId().getStatus().contains(EStatus.FRIEND.name())) {
-                throw new StatusException("Two Email have already being friend.");
+                throw new StatusException("They have already being friend.");
             }
         }
 
@@ -62,6 +63,12 @@ public class RelationServiceImp implements RelationService {
         } catch (Exception ex) {
             return false;
         }
+    }
+
+    @Override
+    public List<String> retrieveFriendsList(EmailRequest emailRequest) {
+         User email = findByEmail(emailRequest.getEmail());
+         return userRepository.getListFriendEmails(email.getId());
     }
 
 }

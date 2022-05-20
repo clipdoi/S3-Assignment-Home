@@ -21,4 +21,13 @@ public class GlobalExceptionHandler {
                 , webRequest.getDescription(false));
     }
 
+    @ExceptionHandler(StatusException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage statusException(InputInvalidException ex, WebRequest webRequest) {
+        return new ErrorMessage(HttpStatus.BAD_REQUEST.value()
+                , ex.getMessage()
+                , LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))
+                , webRequest.getDescription(false));
+    }
+
 }
