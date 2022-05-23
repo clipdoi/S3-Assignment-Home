@@ -1,14 +1,19 @@
 package com.s3.friendsmanagement.service;
 
+import com.s3.friendsmanagement.exception.InputInvalidException;
 import com.s3.friendsmanagement.exception.StatusException;
 import com.s3.friendsmanagement.model.User;
 import com.s3.friendsmanagement.model.UserRelationship;
 import com.s3.friendsmanagement.model.UserRelationshipId;
 import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
 import com.s3.friendsmanagement.payload.request.EmailRequest;
+import com.s3.friendsmanagement.payload.request.SubscribeAndBlockRequest;
 import com.s3.friendsmanagement.repository.UserRelationshipRepository;
 import com.s3.friendsmanagement.repository.UserRepository;
 import com.s3.friendsmanagement.utils.EStatus;
+import com.s3.friendsmanagement.utils.EmailUtils;
+import com.s3.friendsmanagement.utils.ErrorConstraints;
+import com.s3.friendsmanagement.utils.RequestValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +39,10 @@ public class RelationServiceImp implements RelationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addFriend(CreateFriendConnectionReq createFriendConnectionReq) {
+        String error = RequestValidation.checkCreateFriendConnectionReq(createFriendConnectionReq);
+        if (!error.equals("")) {
+            throw new InputInvalidException(error);
+        }
         User email = findByEmail(createFriendConnectionReq.getFriends().get(0));
         User friendEmail = findByEmail(createFriendConnectionReq.getFriends().get(1));
 
@@ -67,8 +76,88 @@ public class RelationServiceImp implements RelationService {
 
     @Override
     public List<String> retrieveFriendsList(EmailRequest emailRequest) {
-         User email = findByEmail(emailRequest.getEmail());
-         return userRepository.getListFriendEmails(email.getId());
+        if (emailRequest == null) {
+            throw new InputInvalidException(ErrorConstraints.INVALID_REQUEST);
+        }
+        if (!EmailUtils.isEmail(emailRequest.getEmail())) {
+            throw new InputInvalidException(ErrorConstraints.INVALID_EMAIL);
+        }
+        User email = findByEmail(emailRequest.getEmail());
+        return userRepository.getListFriendEmails(email.getId());
+    }
+
+    @Override
+    public List<String> getCommonFriends(CreateFriendConnectionReq friendRequest) {
+        String error = RequestValidation.checkCreateFriendConnectionReq(friendRequest);
+        if (!error.equals("")) {
+            throw new InputInvalidException(error);
+        }
+        User requestEmail = findByEmail(friendRequest.getFriends().get(0));
+        User targetEmail = findByEmail(friendRequest.getFriends().get(1));
+
+        return userRepository.getCommonFriends(requestEmail.getId(), targetEmail.getId());
+    }
+
+    @Override
+    public Boolean subscribeTo(SubscribeAndBlockRequest subscribeRequest) {
+        String error = RequestValidation.checkSubscribeAndBlockRequest(subscribeRequest);
+        if (!error.equals("")) {
+            throw new InputInvalidException(error);
+        }
+        User requestEmail = findByEmail(subscribeRequest.getRequester());
+        User targetEmail = findByEmail(subscribeRequest.getTarget());
+
+        Optional<UserRelationship> friendRelationship = userRelationshipRepository
+                .findByUserRelationship(requestEmail.getId(), targetEmail.getId());
+
+        if (friendRelationship.isPresent()) {
+            if (friendRelationship.get().getId().getStatus().contains(EStatus.BLOCK.name())) {
+                throw new StatusException("Target email has been blocked !");
+            }
+            if (friendRelationship.get().getId().getStatus().contains(EStatus.SUBSCRIBE.name())) {
+                throw new StatusException("Already subscribed to this target email !");
+            }
+            if (friendRelationship.get().getId().getStatus().contains(EStatus.FRIEND.name())) {
+                throw new StatusException("Already being friend of this target, no need to subscribe !");
+            }
+        }
+
+        UserRelationshipId userRelationshipId = new UserRelationshipId(requestEmail.getId(), targetEmail.getId(), EStatus.FRIEND.name());
+        UserRelationship relationship = UserRelationship.builder().id(userRelationshipId).build();
+
+        userRelationshipRepository.save(relationship);
+        return true;
+
+    }
+
+    @Override
+    public Boolean blockEmail(SubscribeAndBlockRequest subscribeRequest) {
+        String error = RequestValidation.checkSubscribeAndBlockRequest(subscribeRequest);
+        if (!error.equals("")) {
+            throw new InputInvalidException(error);
+        }
+        User requestEmail = findByEmail(subscribeRequest.getRequester());
+        User targetEmail = findByEmail(subscribeRequest.getTarget());
+
+        Optional<UserRelationship> blockedRelation = userRelationshipRepository.findById(
+                new UserRelationshipId(requestEmail.getId()
+                        , targetEmail.getId()
+                        , EStatus.BLOCK.name()));
+
+        if (blockedRelation.isPresent()) {
+            throw new StatusException("This email has already being blocked !");
+        }
+//        userRelationshipRepository.findById( new UserRelationshipId(requestEmail.getId()
+//                , targetEmail.getId()
+//                , EStatus.BLOCK.name())).orElseThrow(() -> {
+//            throw new StatusException("This email has already being blocked !");
+//        });
+
+        UserRelationshipId userRelationshipId = new UserRelationshipId(requestEmail.getId(), targetEmail.getId(), EStatus.BLOCK.name());
+        UserRelationship relationship = UserRelationship.builder().id(userRelationshipId).build();
+
+        userRelationshipRepository.save(relationship);
+        return true;
     }
 
 }

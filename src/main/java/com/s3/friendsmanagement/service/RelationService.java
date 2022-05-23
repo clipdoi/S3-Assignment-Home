@@ -3,6 +3,7 @@ package com.s3.friendsmanagement.service;
 import com.s3.friendsmanagement.model.User;
 import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
 import com.s3.friendsmanagement.payload.request.EmailRequest;
+import com.s3.friendsmanagement.payload.request.SubscribeAndBlockRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,4 +15,9 @@ public interface RelationService {
 
     List<String> retrieveFriendsList(EmailRequest emailRequest);
 
+    List<String> getCommonFriends(CreateFriendConnectionReq friendRequest);
+
+    Boolean subscribeTo(SubscribeAndBlockRequest subscribeRequest);
+
+    Boolean blockEmail(SubscribeAndBlockRequest subscribeRequest);
 }

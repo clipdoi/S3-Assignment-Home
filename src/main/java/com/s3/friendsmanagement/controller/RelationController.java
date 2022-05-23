@@ -4,6 +4,7 @@ import com.s3.friendsmanagement.exception.InputInvalidException;
 import com.s3.friendsmanagement.exception.StatusException;
 import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
 import com.s3.friendsmanagement.payload.request.EmailRequest;
+import com.s3.friendsmanagement.payload.request.SubscribeAndBlockRequest;
 import com.s3.friendsmanagement.payload.response.RetrieveFriendsListResponse;
 import com.s3.friendsmanagement.payload.response.SuccessResponse;
 import com.s3.friendsmanagement.service.RelationService;
@@ -32,10 +33,6 @@ public class RelationController {
     @PostMapping("/add")
     public ResponseEntity<SuccessResponse> addFriend(
             @Valid @RequestBody CreateFriendConnectionReq createFriendConnectionReq) {
-        String error = RequestValidation.checkCreateFriendConnectionReq(createFriendConnectionReq);
-        if (!error.equals("")) {
-            throw new InputInvalidException(error);
-        }
         try {
             return new ResponseEntity<>(new SuccessResponse
                     (String.valueOf(relationService.addFriend(createFriendConnectionReq))), HttpStatus.CREATED);
@@ -49,16 +46,46 @@ public class RelationController {
     @PostMapping("/friends")
     public ResponseEntity<RetrieveFriendsListResponse> retrieveFriendsList(
             @Valid @RequestBody EmailRequest emailRequest) {
-        if (emailRequest == null) {
-            throw new InputInvalidException(ErrorConstraints.INVALID_REQUEST);
-        }
-        if (!EmailUtils.isEmail(emailRequest.getEmail())) {
-            throw new InputInvalidException(ErrorConstraints.INVALID_EMAIL);
-        }
         List<String> emails = relationService.retrieveFriendsList(emailRequest);
         //return ResponseEntity.noContent().build();
         return new ResponseEntity<>(new RetrieveFriendsListResponse
                 (true, emails, emails.size()), HttpStatus.OK);
     }
 
+    //retrieve the common friends list between two email addresses
+    @PostMapping("/common")
+    public ResponseEntity<RetrieveFriendsListResponse> getCommonFriends(
+            @Valid @RequestBody CreateFriendConnectionReq friendRequest) {
+        List<String> listEmails = relationService.getCommonFriends(friendRequest);
+        return new ResponseEntity<>(new RetrieveFriendsListResponse
+                (true, listEmails, listEmails.size()), HttpStatus.OK);
+    }
+
+    //to subscribe to update from an email address
+    @PostMapping("/subscribe")
+    public ResponseEntity<SuccessResponse> subscribeTo(
+            @Valid @RequestBody SubscribeAndBlockRequest subscribeRequest) {
+        try {
+            return new ResponseEntity<>(new SuccessResponse
+                    (String.valueOf(relationService.subscribeTo(subscribeRequest))), HttpStatus.CREATED);
+        } catch (StatusException statusException){
+            return new ResponseEntity<>(new SuccessResponse(statusException.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    //to block updates from an email address
+    @PostMapping("/block")
+    public ResponseEntity<SuccessResponse> blockEmail(
+            @Valid @RequestBody SubscribeAndBlockRequest subscribeRequest) {
+        try {
+            return new ResponseEntity<>(new SuccessResponse
+                    (String.valueOf(relationService.blockEmail(subscribeRequest))), HttpStatus.CREATED);
+        } catch (StatusException statusException){
+            return new ResponseEntity<>(new SuccessResponse(statusException.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    //to retrieve all email addresses that can receive updates from an email address
 }

@@ -14,7 +14,6 @@ public class EmailUtils {
         Set<String> listEmail = new HashSet<>();
         Matcher matcher = Pattern
                 .compile("[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}").matcher(text);
-//      ^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$
         while (matcher.find()) {
             listEmail.add(matcher.group());
         }

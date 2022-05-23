@@ -1,6 +1,7 @@
 package com.s3.friendsmanagement.utils;
 
 import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
+import com.s3.friendsmanagement.payload.request.SubscribeAndBlockRequest;
 import com.s3.friendsmanagement.utils.ErrorConstraints;
 
 public class RequestValidation {
@@ -28,6 +29,18 @@ public class RequestValidation {
         return "";
     }
 
-
+    public static String checkSubscribeAndBlockRequest(SubscribeAndBlockRequest request) {
+        if (request == null || request.getRequester() == null || request.getTarget() == null) {
+            return ErrorConstraints.INVALID_REQUEST;
+        }
+        if (!EmailUtils.isEmail(request.getRequester())
+                || !EmailUtils.isEmail(request.getTarget())) {
+            return ErrorConstraints.INVALID_EMAIL;
+        }
+        if (request.getRequester().equals(request.getTarget())) {
+            return ErrorConstraints.EMAIL_DUPLICATED;
+        }
+        return "";
+    }
 
 }

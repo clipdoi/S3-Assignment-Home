@@ -14,4 +14,5 @@ public interface UserRelationshipRepository extends JpaRepository<UserRelationsh
             "WHERE email_id = ?1 AND friend_id = ?2", nativeQuery = true)
     Optional<UserRelationship> findByUserRelationship(Long emailId, Long friendId);
 //    Optional<UserRelationship> findByUserRelationship(UserRelationshipId userRelationshipId);
+
 }
