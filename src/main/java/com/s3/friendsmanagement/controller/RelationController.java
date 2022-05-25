@@ -33,12 +33,12 @@ public class RelationController {
     @PostMapping("/add")
     public ResponseEntity<SuccessResponse> addFriend(
             @Valid @RequestBody CreateFriendConnectionReq createFriendConnectionReq) {
-        try {
-            return new ResponseEntity<>(new SuccessResponse
-                    (String.valueOf(relationService.addFriend(createFriendConnectionReq))), HttpStatus.CREATED);
-        } catch (StatusException statusException){
-            return new ResponseEntity<>(new SuccessResponse(statusException.getMessage()), HttpStatus.BAD_REQUEST);
+        String error = RequestValidation.checkCreateFriendConnectionReq(createFriendConnectionReq);
+        if (!error.equals("")) {
+            throw new InputInvalidException(error);
         }
+        return new ResponseEntity<>(new SuccessResponse
+                (relationService.addFriend(createFriendConnectionReq)), HttpStatus.CREATED);
 
     }
 
@@ -46,9 +46,14 @@ public class RelationController {
     @PostMapping("/friends")
     public ResponseEntity<RetrieveFriendsListResponse> retrieveFriendsList(
             @Valid @RequestBody EmailRequest emailRequest) {
+        if (emailRequest == null) {
+            throw new InputInvalidException(ErrorConstraints.INVALID_REQUEST);
+        }
+        if (!EmailUtils.isEmail(emailRequest.getEmail())) {
+            throw new InputInvalidException(ErrorConstraints.INVALID_EMAIL);
+        }
         List<String> emails = relationService.retrieveFriendsList(emailRequest);
-        //return ResponseEntity.noContent().build();
-        return new ResponseEntity<>(new RetrieveFriendsListResponse
+        return emails.isEmpty() ? ResponseEntity.noContent().build() : new ResponseEntity<>(new RetrieveFriendsListResponse
                 (true, emails, emails.size()), HttpStatus.OK);
     }
 
@@ -56,8 +61,12 @@ public class RelationController {
     @PostMapping("/common")
     public ResponseEntity<RetrieveFriendsListResponse> getCommonFriends(
             @Valid @RequestBody CreateFriendConnectionReq friendRequest) {
+        String error = RequestValidation.checkCreateFriendConnectionReq(friendRequest);
+        if (!error.equals("")) {
+            throw new InputInvalidException(error);
+        }
         List<String> listEmails = relationService.getCommonFriends(friendRequest);
-        return new ResponseEntity<>(new RetrieveFriendsListResponse
+        return listEmails.isEmpty() ? ResponseEntity.noContent().build() : new ResponseEntity<>(new RetrieveFriendsListResponse
                 (true, listEmails, listEmails.size()), HttpStatus.OK);
     }
 
@@ -65,12 +74,13 @@ public class RelationController {
     @PostMapping("/subscribe")
     public ResponseEntity<SuccessResponse> subscribeTo(
             @Valid @RequestBody SubscribeAndBlockRequest subscribeRequest) {
-        try {
-            return new ResponseEntity<>(new SuccessResponse
-                    (String.valueOf(relationService.subscribeTo(subscribeRequest))), HttpStatus.CREATED);
-        } catch (StatusException statusException){
-            return new ResponseEntity<>(new SuccessResponse(statusException.getMessage()), HttpStatus.BAD_REQUEST);
+        String error = RequestValidation.checkSubscribeAndBlockRequest(subscribeRequest);
+        if (!error.equals("")) {
+            throw new InputInvalidException(error);
         }
+
+        return new ResponseEntity<>(new SuccessResponse
+                (relationService.subscribeTo(subscribeRequest)), HttpStatus.CREATED);
 
     }
 
@@ -78,12 +88,13 @@ public class RelationController {
     @PutMapping("/block")
     public ResponseEntity<SuccessResponse> blockEmail(
             @Valid @RequestBody SubscribeAndBlockRequest subscribeRequest) {
-        try {
-            return new ResponseEntity<>(new SuccessResponse
-                    (String.valueOf(relationService.blockEmail(subscribeRequest))), HttpStatus.OK);
-        } catch (StatusException statusException){
-            return new ResponseEntity<>(new SuccessResponse(statusException.getMessage()), HttpStatus.BAD_REQUEST);
+        String error = RequestValidation.checkSubscribeAndBlockRequest(subscribeRequest);
+        if (!error.equals("")) {
+            throw new InputInvalidException(error);
         }
+
+        return new ResponseEntity<>(new SuccessResponse
+                (relationService.blockEmail(subscribeRequest)), HttpStatus.OK);
 
     }
 
@@ -96,10 +107,8 @@ public class RelationController {
             throw new InputInvalidException(error);
         }
         Set<String> setEmails = relationService.retrieveEmails(retrieveRequest);
-        if (setEmails.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return new ResponseEntity<>(new RetrieveEmailResponse
+
+        return setEmails.isEmpty() ? ResponseEntity.noContent().build() : new ResponseEntity<>(new RetrieveEmailResponse
                 (true, setEmails), HttpStatus.OK);
     }
 }

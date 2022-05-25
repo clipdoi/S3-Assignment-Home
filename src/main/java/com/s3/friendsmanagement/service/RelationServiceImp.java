@@ -41,10 +41,7 @@ public class RelationServiceImp implements RelationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addFriend(CreateFriendConnectionReq createFriendConnectionReq) {
-        String error = RequestValidation.checkCreateFriendConnectionReq(createFriendConnectionReq);
-        if (!error.equals("")) {
-            throw new InputInvalidException(error);
-        }
+
         User email = findByEmail(createFriendConnectionReq.getFriends().get(0));
         User friendEmail = findByEmail(createFriendConnectionReq.getFriends().get(1));
 
@@ -78,22 +75,14 @@ public class RelationServiceImp implements RelationService {
 
     @Override
     public List<String> retrieveFriendsList(EmailRequest emailRequest) {
-        if (emailRequest == null) {
-            throw new InputInvalidException(ErrorConstraints.INVALID_REQUEST);
-        }
-        if (!EmailUtils.isEmail(emailRequest.getEmail())) {
-            throw new InputInvalidException(ErrorConstraints.INVALID_EMAIL);
-        }
+
         User email = findByEmail(emailRequest.getEmail());
         return userRepository.getListFriendEmails(email.getId());
     }
 
     @Override
     public List<String> getCommonFriends(CreateFriendConnectionReq friendRequest) {
-        String error = RequestValidation.checkCreateFriendConnectionReq(friendRequest);
-        if (!error.equals("")) {
-            throw new InputInvalidException(error);
-        }
+
         User requestEmail = findByEmail(friendRequest.getFriends().get(0));
         User targetEmail = findByEmail(friendRequest.getFriends().get(1));
 
@@ -102,10 +91,7 @@ public class RelationServiceImp implements RelationService {
 
     @Override
     public Boolean subscribeTo(SubscribeAndBlockRequest subscribeRequest) {
-        String error = RequestValidation.checkSubscribeAndBlockRequest(subscribeRequest);
-        if (!error.equals("")) {
-            throw new InputInvalidException(error);
-        }
+
         User requestEmail = findByEmail(subscribeRequest.getRequester());
         User targetEmail = findByEmail(subscribeRequest.getTarget());
 
@@ -135,10 +121,7 @@ public class RelationServiceImp implements RelationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean blockEmail(SubscribeAndBlockRequest subscribeRequest) {
-        String error = RequestValidation.checkSubscribeAndBlockRequest(subscribeRequest);
-        if (!error.equals("")) {
-            throw new InputInvalidException(error);
-        }
+
         User requestEmail = findByEmail(subscribeRequest.getRequester());
         User targetEmail = findByEmail(subscribeRequest.getTarget());
 
