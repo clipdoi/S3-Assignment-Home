@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -20,4 +21,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "inner join (select id from user_relationship ur right join \"user\" u on ur.friend_id = u.id where ur.email_id = ?2 and status = 'FRIEND') as f2 \n" +
             "on f1.id = f2.id;", nativeQuery = true)
     List<String> getCommonFriends(long first_id, long second_id);
+
+    @Query(value = "select email from \"user\" u left join user_relationship ur on u.id = ur.friend_id where ur.email_id = ?1 \n" +
+            "and ((ur.status = 'FRIEND' or ur.status = 'SUBSCRIBE') and ur.status != 'BLOCK')", nativeQuery = true)
+    List<String> getRetrievableEmail(Long id);
+
+    @Query(value = "select email \n" +
+            "from \"user\" \n" +
+            "where email in (?1)", nativeQuery = true)
+    Set<String> getEmailFromSet(Set<String> setEmails);
 }

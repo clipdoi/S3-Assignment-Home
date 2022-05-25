@@ -1,6 +1,7 @@
 package com.s3.friendsmanagement.utils;
 
 import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
+import com.s3.friendsmanagement.payload.request.RetrieveRequest;
 import com.s3.friendsmanagement.payload.request.SubscribeAndBlockRequest;
 import com.s3.friendsmanagement.utils.ErrorConstraints;
 
@@ -43,4 +44,13 @@ public class RequestValidation {
         return "";
     }
 
+    public static String checkRetrieveRequest(RetrieveRequest request) {
+        if (request == null || request.getSender() == null || request.getText() == null) {
+            return ErrorConstraints.INVALID_REQUEST;
+        }
+        if (!EmailUtils.isEmail(request.getSender())) {
+            return ErrorConstraints.INVALID_EMAIL;
+        }
+        return "";
+    }
 }

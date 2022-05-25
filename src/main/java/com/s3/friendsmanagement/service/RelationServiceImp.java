@@ -7,6 +7,7 @@ import com.s3.friendsmanagement.model.UserRelationship;
 import com.s3.friendsmanagement.model.UserRelationshipId;
 import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
 import com.s3.friendsmanagement.payload.request.EmailRequest;
+import com.s3.friendsmanagement.payload.request.RetrieveRequest;
 import com.s3.friendsmanagement.payload.request.SubscribeAndBlockRequest;
 import com.s3.friendsmanagement.repository.UserRelationshipRepository;
 import com.s3.friendsmanagement.repository.UserRepository;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class RelationServiceImp implements RelationService {
@@ -131,6 +133,7 @@ public class RelationServiceImp implements RelationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean blockEmail(SubscribeAndBlockRequest subscribeRequest) {
         String error = RequestValidation.checkSubscribeAndBlockRequest(subscribeRequest);
         if (!error.equals("")) {
@@ -139,25 +142,30 @@ public class RelationServiceImp implements RelationService {
         User requestEmail = findByEmail(subscribeRequest.getRequester());
         User targetEmail = findByEmail(subscribeRequest.getTarget());
 
-        Optional<UserRelationship> blockedRelation = userRelationshipRepository.findById(
-                new UserRelationshipId(requestEmail.getId()
-                        , targetEmail.getId()
-                        , EStatus.BLOCK.name()));
-
+        Optional<UserRelationship> blockedRelation = userRelationshipRepository.findByUserRelationship(requestEmail.getId(), targetEmail.getId());
         if (blockedRelation.isPresent()) {
-            throw new StatusException("This email has already being blocked !");
+            if(blockedRelation.get().getId().getStatus().equals("BLOCK")) {
+                throw new StatusException("This email has already being blocked !");
+            } else {
+                userRelationshipRepository.updateStatusByEmailIdAndFriendId(requestEmail.getId(), targetEmail.getId());
+            }
         }
-//        userRelationshipRepository.findById( new UserRelationshipId(requestEmail.getId()
-//                , targetEmail.getId()
-//                , EStatus.BLOCK.name())).orElseThrow(() -> {
-//            throw new StatusException("This email has already being blocked !");
-//        });
 
-        UserRelationshipId userRelationshipId = new UserRelationshipId(requestEmail.getId(), targetEmail.getId(), EStatus.BLOCK.name());
-        UserRelationship relationship = UserRelationship.builder().id(userRelationshipId).build();
-
-        userRelationshipRepository.save(relationship);
         return true;
+    }
+
+    @Override
+    public Set<String> retrieveEmails(RetrieveRequest retrieveRequest) {
+        User senderEmail = findByEmail(retrieveRequest.getSender());
+
+        Set<String> emailList = EmailUtils.getEmailsFromText(retrieveRequest.getText());
+
+        emailList = userRepository.getEmailFromSet(emailList);
+
+        List<String> listRetrievableEmail = userRepository.getRetrievableEmail(senderEmail.getId());
+
+        emailList.addAll(listRetrievableEmail);
+        return emailList;
     }
 
 }
