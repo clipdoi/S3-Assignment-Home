@@ -38,7 +38,7 @@ VALUES('hongson@gmail.com'),
 ('nguyenphi@gmail.com');
 
 
-INSERT INTO public.user_relationship(email_id, friend_id, status)
+INSERT INTO public."user_relationship"(email_id, friend_id, status)
 VALUES(1, 2, 'FRIEND'),
 (1, 3, 'FRIEND'),
 (1, 4, 'FRIEND'),

@@ -129,12 +129,13 @@ public class RelationServiceImp implements RelationService {
         if (blockedRelation.isPresent()) {
             if(blockedRelation.get().getId().getStatus().equals("BLOCK")) {
                 throw new StatusException("This email has already being blocked !");
-            } else {
-                userRelationshipRepository.updateStatusByEmailIdAndFriendId(requestEmail.getId(), targetEmail.getId());
             }
         }
-
-        return true;
+        int row = userRelationshipRepository.updateStatusByEmailIdAndFriendId(requestEmail.getId(), targetEmail.getId());
+        if(row == 1) {
+            return true;
+        }
+        return false;
     }
 
     @Override

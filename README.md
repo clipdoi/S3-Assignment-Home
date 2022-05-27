@@ -44,8 +44,8 @@ https://www.postman.com/downloads/
   Error Response Example
    {
     "statusCode": 400,
-    "timestamp": "Invalid input email format",
-    "message": "2022/05/25 13:45:03",
+    "message": "Invalid input email format",
+    "timestamp": "2022/05/25 13:45:03",
     "description": "uri=/api/emails/add"
    }
    ````
@@ -70,8 +70,8 @@ https://www.postman.com/downloads/
   Error Response Example:
    {
         "statusCode": 400,
-        "timestamp": "Invalid input email format",
-        "message": "2022/05/25 13:51:54",
+        "message": "Invalid input email format",
+        "timestamp": "2022/05/25 13:51:54",
         "description": "uri=/api/emails/friends"
    }
  ````
@@ -97,8 +97,8 @@ https://www.postman.com/downloads/
  Error Response Example:
       {
         "statusCode": 400,
-        "timestamp": "Invalid input email format",
-        "message": "2022/05/25 13:55:42",
+        "message": "Invalid input email format",
+        "timestamp": "2022/05/25 13:55:42",
         "description": "uri=/api/emails/common"
       }
   ````
@@ -118,8 +118,8 @@ https://www.postman.com/downloads/
   Error Response Example:
        {
             "statusCode": 400,
-            "timestamp": "Invalid input email format",
-            "message": "2022/05/25 14:00:52",
+            "message": "Invalid input email format",
+            "timestamp": "2022/05/25 14:00:52",
             "description": "uri=/api/emails/subscribe"
        }
   -------------------------------------------------------------
@@ -138,8 +138,8 @@ https://www.postman.com/downloads/
   Error Response Example:
    {
         "statusCode": 400,
-        "timestamp": "Invalid input email format",
-        "message": "2022/05/25 14:04:39",
+        "message": "Invalid input email format",
+        "timestamp": "2022/05/25 14:04:39",
         "description": "uri=/api/emails/block"
    }
    ````
@@ -165,8 +165,8 @@ https://www.postman.com/downloads/
   Error Response Example:
     {
         "statusCode": 400,
-        "timestamp": "Invalid input email format",
-        "message": "2022/05/25 14:07:29",
+        "message": "Invalid input email format",
+        "timestamp": "2022/05/25 14:07:29",
         "description": "uri=/api/emails/retrieve"
     }
 ````

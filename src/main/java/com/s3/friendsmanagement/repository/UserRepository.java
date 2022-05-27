@@ -13,7 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "select u.email \n" +
             "from user_relationship ur right join public.\"user\" u on ur.friend_id = u.id\n" +
-            "where ur.email_id = ?1 and ur.status = 'FRIEND'", nativeQuery = true)
+            "where ur.email_id = ?1 and ur.status = 'FRIEND' order by u.id asc", nativeQuery = true)
     List<String> getListFriendEmails(Long id);
 
     @Query(value = "select f1.email \n" +
@@ -23,7 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<String> getCommonFriends(long first_id, long second_id);
 
     @Query(value = "select email from \"user\" u left join user_relationship ur on u.id = ur.friend_id where ur.email_id = ?1 \n" +
-            "and ((ur.status = 'FRIEND' or ur.status = 'SUBSCRIBE') and ur.status != 'BLOCK')", nativeQuery = true)
+            "and ((ur.status = 'FRIEND' or ur.status = 'SUBSCRIBE') and ur.status != 'BLOCK') order by u.id asc", nativeQuery = true)
     List<String> getRetrievableEmail(Long id);
 
     @Query(value = "select email \n" +

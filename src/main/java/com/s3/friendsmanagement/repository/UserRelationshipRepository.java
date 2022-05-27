@@ -19,5 +19,5 @@ public interface UserRelationshipRepository extends JpaRepository<UserRelationsh
     @Query(value = "UPDATE public.user_relationship\n" +
             "SET status='BLOCK'\n" +
             "WHERE email_id= ?1 AND friend_id= ?2 AND status = 'FRIEND'", nativeQuery = true)
-    void updateStatusByEmailIdAndFriendId(Long emailId, Long friendId);
+    int updateStatusByEmailIdAndFriendId(Long emailId, Long friendId);
 }
