@@ -1,5 +1,6 @@
 package com.s3.friendsmanagement.service;
 
+import com.s3.friendsmanagement.exception.DataNotFoundException;
 import com.s3.friendsmanagement.exception.InputInvalidException;
 import com.s3.friendsmanagement.exception.StatusException;
 import com.s3.friendsmanagement.model.User;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.zip.DataFormatException;
 
 @Service
 public class RelationServiceImp implements RelationService {
@@ -44,6 +46,9 @@ public class RelationServiceImp implements RelationService {
 
         User email = findByEmail(createFriendConnectionReq.getFriends().get(0));
         User friendEmail = findByEmail(createFriendConnectionReq.getFriends().get(1));
+        if(email == null && friendEmail == null) {
+            throw new DataNotFoundException(ErrorConstraints.EMAIL_NOT_FOUND);
+        }
 
         Optional<UserRelationship> friendRelationship = userRelationshipRepository
                 .findByUserRelationship(email.getId(), friendEmail.getId());
@@ -77,6 +82,9 @@ public class RelationServiceImp implements RelationService {
     public List<String> retrieveFriendsList(EmailRequest emailRequest) {
 
         User email = findByEmail(emailRequest.getEmail());
+        if(email == null){
+            throw new DataNotFoundException(ErrorConstraints.EMAIL_NOT_FOUND);
+        }
         return userRepository.getListFriendEmails(email.getId());
     }
 
@@ -85,6 +93,9 @@ public class RelationServiceImp implements RelationService {
 
         User requestEmail = findByEmail(friendRequest.getFriends().get(0));
         User targetEmail = findByEmail(friendRequest.getFriends().get(1));
+        if(requestEmail == null && targetEmail == null) {
+            throw new DataNotFoundException(ErrorConstraints.EMAIL_NOT_FOUND);
+        }
 
         return userRepository.getCommonFriends(requestEmail.getId(), targetEmail.getId());
     }
@@ -94,6 +105,9 @@ public class RelationServiceImp implements RelationService {
 
         User requestEmail = findByEmail(subscribeRequest.getRequester());
         User targetEmail = findByEmail(subscribeRequest.getTarget());
+        if(requestEmail == null && targetEmail == null) {
+            throw new DataNotFoundException(ErrorConstraints.EMAIL_NOT_FOUND);
+        }
 
         Optional<UserRelationship> friendRelationship = userRelationshipRepository
                 .findByUserRelationship(requestEmail.getId(), targetEmail.getId());
@@ -124,6 +138,9 @@ public class RelationServiceImp implements RelationService {
 
         User requestEmail = findByEmail(subscribeRequest.getRequester());
         User targetEmail = findByEmail(subscribeRequest.getTarget());
+        if(requestEmail == null && targetEmail == null) {
+            throw new DataNotFoundException(ErrorConstraints.EMAIL_NOT_FOUND);
+        }
 
         Optional<UserRelationship> blockedRelation = userRelationshipRepository.findByUserRelationship(requestEmail.getId(), targetEmail.getId());
         if (blockedRelation.isPresent()) {
@@ -132,15 +149,18 @@ public class RelationServiceImp implements RelationService {
             }
         }
         int row = userRelationshipRepository.updateStatusByEmailIdAndFriendId(requestEmail.getId(), targetEmail.getId());
-        if(row == 1) {
-            return true;
+        if(row != 1) {
+            throw new StatusException("Error server !");
         }
-        return false;
+        return true;
     }
 
     @Override
     public Set<String> retrieveEmails(RetrieveRequest retrieveRequest) {
         User senderEmail = findByEmail(retrieveRequest.getSender());
+        if(senderEmail == null) {
+            throw new DataNotFoundException(ErrorConstraints.EMAIL_NOT_FOUND);
+        }
 
         Set<String> emailList = EmailUtils.getEmailsFromText(retrieveRequest.getText());
 

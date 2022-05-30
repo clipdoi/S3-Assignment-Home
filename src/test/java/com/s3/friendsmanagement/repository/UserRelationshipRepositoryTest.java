@@ -50,11 +50,5 @@ public class UserRelationshipRepositoryTest {
         assertEquals(1, row);
     }
 
-    @Test
-    public void updateStatusByEmailIdAndFriendIdNotSuccess(){
-        int row = relationshipRepository.updateStatusByEmailIdAndFriendId
-                (relationTest.getId().getEmailId(), relationTest.getId().getFriendId());
-        assertEquals(0, row);
-    }
 
 }
