@@ -259,6 +259,28 @@ public class RelationControllerTest {
     }
 
     @Test
+    public void retrieveFriendsListEmailNullInvalidRequestTest() throws Exception {
+        //Test with invalid AddFriend request
+//        emailRequest.setEmail(null);
+        emailRequest = null;
+        //when(relationService.retrieveFriendsList(any(EmailRequest.class))).thenReturn(null);
+
+        String json = objectMapper.writeValueAsString(emailRequest);
+        MvcResult result = mockMvc.perform(post("/api/emails/friends")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
+        assertEquals("{\"error\":[\"Invalid request\"],\"timestamp\":\""+ timestamp +"\",\"status\":400}"
+                , content);
+    }
+
+
+    @Test
     public void retrieveFriendsListNoContent() throws Exception {
         //Test with no content case
         emailRequest = new EmailRequest("kienca@gmail.com");
@@ -795,6 +817,25 @@ public class RelationControllerTest {
 
         String content = result.getResponse().getContentAsString();
         assertEquals("{\"success\":true,\"recipients\":[\"saomai@gmail.com\",\"minhthong@gmail.com\"]}", content);
+    }
+
+    @Test
+    public void retrieveEmailInvalidInputTest() throws Exception {
+        //Test with invalid input
+        retrieveRequest = new RetrieveRequest("hongSonGmail.com", "Hello phuongthao@gmail.com");
+
+        String json = objectMapper.writeValueAsString(retrieveRequest);
+        MvcResult result= mockMvc.perform(post("/api/emails/retrieve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
+        assertEquals("{\"statusCode\":400,\"message\":\"Invalid input email format\",\"timestamp\":\""+ timestamp +"\",\"description\":\"uri=/api/emails/retrieve\"}", content);
+
     }
 
     @Test

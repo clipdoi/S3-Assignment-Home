@@ -1,7 +1,6 @@
 package com.s3.friendsmanagement.controller;
 
 import com.s3.friendsmanagement.exception.InputInvalidException;
-import com.s3.friendsmanagement.exception.StatusException;
 import com.s3.friendsmanagement.payload.request.CreateFriendConnectionReq;
 import com.s3.friendsmanagement.payload.request.EmailRequest;
 import com.s3.friendsmanagement.payload.request.RetrieveRequest;
@@ -111,4 +110,5 @@ public class RelationController {
         return setEmails.isEmpty() ? ResponseEntity.noContent().build() : new ResponseEntity<>(new RetrieveEmailResponse
                 (true, setEmails), HttpStatus.OK);
     }
+
 }
