@@ -21,6 +21,13 @@
 ```
 git clone https://github.com/clipdoi/S3-Assignment-Home.git
 ```
+##### Run project
+
+* Docker
+```
+docker-compose up --build
+```
+
 ##### Test api with postman
 ```
 https://www.postman.com/downloads/
