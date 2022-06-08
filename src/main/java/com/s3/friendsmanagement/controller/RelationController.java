@@ -45,9 +45,9 @@ public class RelationController {
     @PostMapping("/friends")
     public ResponseEntity<RetrieveFriendsListResponse> retrieveFriendsList(
             @Valid @RequestBody EmailRequest emailRequest) {
-        if (emailRequest == null) {
-            throw new InputInvalidException(ErrorConstraints.INVALID_REQUEST);
-        }
+//        if (emailRequest == null) {
+//            throw new InputInvalidException(ErrorConstraints.INVALID_REQUEST);
+//        }
         if (!EmailUtils.isEmail(emailRequest.getEmail())) {
             throw new InputInvalidException(ErrorConstraints.INVALID_EMAIL);
         }

@@ -84,7 +84,7 @@ public class RelationServiceImpTest {
         listEmail = new ArrayList<>();
 
         dataNotFoundException = new DataNotFoundException(ErrorConstraints.EMAIL_NOT_FOUND);
-
+        statusException = new StatusException("Error server !");
     }
 
     @Test
@@ -306,6 +306,20 @@ public class RelationServiceImpTest {
 
     }
 
+    @Test
+    public void testBlockEmailUpdateStatusFail() {
+        subBlockRequest = new SubscribeAndBlockRequest(emailTest5.getEmail(), emailTest4.getEmail());
+
+        when(userRepository.findByEmail(emailTest5.getEmail())).thenReturn(emailTest5);
+        when(userRepository.findByEmail(emailTest4.getEmail())).thenReturn(emailTest4);
+        when(relationshipRepository.findByUserRelationship(emailTest5.getId(), emailTest4.getId()))
+                .thenReturn(Optional.empty());
+        when(relationshipRepository.updateStatusByEmailIdAndFriendId(emailTest5.getId(), emailTest4.getId())).thenReturn(0);
+
+        assertEquals(statusException, assertThrows(StatusException.class
+                , () -> relationService.blockEmail(subBlockRequest)));
+
+    }
     @Test
     public void testRetrieveEmailSuccess() {
         retrieveRequest = new RetrieveRequest(emailTest1.getEmail(), "Hello " + emailTest5.getEmail());

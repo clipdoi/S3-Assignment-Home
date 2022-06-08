@@ -1,6 +1,5 @@
 package com.s3.friendsmanagement.controller;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.s3.friendsmanagement.exception.DataNotFoundException;
 import com.s3.friendsmanagement.exception.StatusException;
@@ -13,7 +12,6 @@ import com.s3.friendsmanagement.repository.UserRepository;
 import com.s3.friendsmanagement.service.RelationService;
 import com.s3.friendsmanagement.utils.ErrorConstraints;
 import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -22,6 +20,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,6 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest()
 @AutoConfigureMockMvc()
 @EnableWebMvc
+@ContextConfiguration
+@WithMockUser(roles={"USER"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RelationControllerTest {
 
@@ -59,6 +62,7 @@ public class RelationControllerTest {
 
     private EmailRequest emailRequest;
     private CreateFriendConnectionReq addCommonRequest;
+
     private SubscribeAndBlockRequest subBlockRequest;
     private RetrieveRequest retrieveRequest;
 
@@ -77,7 +81,7 @@ public class RelationControllerTest {
 
         retrieveRequest = new RetrieveRequest();
         emailRequest = new EmailRequest();
-        addCommonRequest = new CreateFriendConnectionReq();
+        addCommonRequest = new CreateFriendConnectionReq(listEmail);
         subBlockRequest = new SubscribeAndBlockRequest();
 
     }
@@ -258,26 +262,23 @@ public class RelationControllerTest {
 
     }
 
-    @Test
-    public void retrieveFriendsListEmailNullInvalidRequestTest() throws Exception {
-        //Test with invalid AddFriend request
-//        emailRequest.setEmail(null);
-        emailRequest = null;
-        //when(relationService.retrieveFriendsList(any(EmailRequest.class))).thenReturn(null);
-
-        String json = objectMapper.writeValueAsString(emailRequest);
-        MvcResult result = mockMvc.perform(post("/api/emails/friends")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        String content = result.getResponse().getContentAsString();
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
-        assertEquals("{\"error\":[\"Invalid request\"],\"timestamp\":\""+ timestamp +"\",\"status\":400}"
-                , content);
-    }
+//    @Test
+//    public void retrieveFriendsListEmailRequestNullTest() throws Exception {
+//        emailRequest = null;
+//
+//        String json = objectMapper.writeValueAsString(null);
+//        MvcResult result = mockMvc.perform(post("/api/emails/friends")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(json))
+//                .andDo(print())
+//                .andExpect(status().isBadRequest())
+//                .andReturn();
+//
+//        String content = result.getResponse().getContentAsString();
+//        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
+//        assertEquals("{\"error\":[\"Invalid request\"],\"timestamp\":\""+ timestamp +"\",\"status\":400}"
+//                , content);
+//    }
 
 
     @Test

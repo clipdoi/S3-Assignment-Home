@@ -1,7 +1,6 @@
 package com.s3.friendsmanagement.service;
 
 import com.s3.friendsmanagement.exception.DataNotFoundException;
-import com.s3.friendsmanagement.exception.InputInvalidException;
 import com.s3.friendsmanagement.exception.StatusException;
 import com.s3.friendsmanagement.model.User;
 import com.s3.friendsmanagement.model.UserRelationship;
@@ -15,16 +14,13 @@ import com.s3.friendsmanagement.repository.UserRepository;
 import com.s3.friendsmanagement.utils.EStatus;
 import com.s3.friendsmanagement.utils.EmailUtils;
 import com.s3.friendsmanagement.utils.ErrorConstraints;
-import com.s3.friendsmanagement.utils.RequestValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.zip.DataFormatException;
 
 @Service
 public class RelationServiceImp implements RelationService {
